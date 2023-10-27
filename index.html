@@ -9,46 +9,23 @@
 </head>
 <body>
     <div id="pageWrapper">
-        <nav class="navbar navbar-expand-lg"
-             :class="{'navbar-light bg-light' : !useDarkNavbar, 'navbar-dark bg-dark' : useDarkNavbar}" 
-        >
-            <div class="container-fluid">
-                <a href="#" class="navbar-brand">My Vue</a>
-                <ul  class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li v-for="(page, index) in pages" class="nav-item">
-                        <a 
-                            :key="index"
-                            :class=" {active : activePage==index}"
-                            :href="page.link.url" 
-                            :titile="`This is ${page.link.text} page.`"
-                            class="nav-link " 
-                            @click.prevent="activePage=index"
-                            arial-current="page">
-                            {{page.link.text}}
-                        </a>
-                    </li>
-                    
-                </ul>
-                <form class="d-flex">
-                    <button 
-                        class="btn btn-primary" 
-                        @click.prevent="useDarkNavbar=!useDarkNavbar">
-                    </button>
-                </form>
-            </div>
-        </nav>
-        <div id="content" class="container">
-            <h1>{{pages[activePage].pageTitle}}</h1>
-            <h3>{{pages[activePage].content}}</h3>
-        </div>
-    
+        <navbar
+            :pages="pages"
+            :activePage="activePage"
+            :navlink-click="(index)=>activePage=index"
+            >
+
+        </navbar>
+        <page-content 
+            :page="pages[activePage]">
+        </page-content>
+
     </div>
     <script>
-        Vue.createApp({
+       let app= Vue.createApp({
             data(){
                 return{
                     activePage:0,
-                    useDarkNavbar:false,
                     pages:[
                         {
                             link:{text:"Home",url:"home.html"},
@@ -67,8 +44,72 @@
                         },
                     ]
                 }
+            },
+            
+        })
+        app.component('page-content',{
+            props:['page'],
+            template:
+            `<div id="content" class="container">
+                <h1>{{page.pageTitle}}</h1>
+                <h3>{{page.content}}</h3>
+            </div>
+            `
+        })
+
+        app.component('navbar',{
+            
+            props:['pages','activePage','navlinkClick'],
+            template:
+            `
+            <nav class="navbar navbar-expand-lg"
+             :class="[\`bg-\${theme}\`, \`navbar-\${theme}\` ,'navbar', 'navbar-expand-lg']" >
+            <div class="container-fluid">
+                <a href="#" class="navbar-brand">My Vue</a>
+                <ul  class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li v-for="(page, index) in pages" class="nav-item">
+                        <a 
+                            :key="index"
+                            :class=" {active : activePage==index}"
+                            :href="page.link.url" 
+                            :titile="\`This is \${page.link.text} page.\`"
+                            class="nav-link " 
+                            @click.prevent="navlinkClick(index)"
+                            arial-current="page">
+                            {{page.link.text}}
+                        </a>
+                    </li>
+                    
+                </ul>
+                <form class="d-flex">
+                    <button 
+                        class="btn btn-primary" 
+                        @click.prevent="changeTheme"
+                        >
+                    </button>
+                </form>
+            </div>
+        </nav>
+            `,
+            methods:{
+                changeTheme(){
+                    console.log(this.theme)
+                    // let theme="light"
+                    if(this.theme=="light"){
+                        this.theme="dark"
+                    }else{
+                        this.theme="light"
+                    }
+                }
+            },
+            data(){
+                return{
+                    theme:"dark",
+                }
             }
-        }).mount("#pageWrapper")
+        })
+
+        app.mount("#pageWrapper") 
     </script>
 </body>
 </html>
